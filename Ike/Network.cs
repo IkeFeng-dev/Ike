@@ -16,7 +16,7 @@ namespace Ike
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
-		public static string[] Agents = [
+		private readonly static string[] agents = [
 		 "Mozilla/4.0 (compatible; MSIE 7.0; windows NT 5.1; NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; Infopath.2)",
 		 "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705",
 		"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
@@ -353,7 +353,11 @@ namespace Ike
 		"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.66 Safari/535.11 ",
 		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.65 Safari/535.11",];
 
-
+		/// <summary>
+		/// 浏览器Agents
+		/// </summary>
+		public static string[] Agents { get { return agents; } }		
+		
 		/// <summary>
 		/// 检测URL是否有效,使用<see langword="GET"/> 方法请求
 		/// </summary>
@@ -451,6 +455,7 @@ namespace Ike
 			System.Net.NetworkInformation.PingReply pr = ping.Send(ip);
 			return pr.Status == System.Net.NetworkInformation.IPStatus.Success;
 		}
+
 		/// <summary>
 		/// 检测是否连通的ip地址
 		/// </summary>
@@ -466,6 +471,7 @@ namespace Ike
 			}
 			return -1;
 		}
+
 		/// <summary>
 		/// 获取随机Agent
 		/// </summary>
@@ -473,6 +479,74 @@ namespace Ike
 		public static string GetRandomAgent()
 		{
 			return Agents[new Random().Next(0, Agents.Length - 1)];
+		}
+
+
+
+		/// <summary>
+		/// 视频链接是否有效
+		/// </summary>
+		/// <param name="videoUrl">连接地址</param>
+		/// <param name="timeout">超时时间,单位是<seealso langword="Millisecond" /></param>
+		/// <returns>
+		/// <list type="table">
+		/// <item><b>Item1</b>表示是否正常(<see cref="bool"/>)</item>
+		/// <item><b>Item2</b>表示说明信息(<see cref="string"/>)</item>
+		/// </list>
+		/// </returns>
+		public static async Task<Tuple<bool, string>> IsVideoPlayableAsync(string videoUrl, int timeout)
+		{
+			try
+			{
+				using (HttpClient client = new HttpClient())
+				{
+					client.Timeout = TimeSpan.FromMilliseconds(timeout);
+					string[] suffixs = new string[] { ".mp4", ".flv", ".webm", ".ogg", ".mkv", ".3gp", ".avi", ".mov" };
+					if (suffixs.Any(suffix => videoUrl.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)))
+					{
+						HttpResponseMessage response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, videoUrl));
+						if (response.IsSuccessStatusCode)
+						{
+							return new Tuple<bool, string>(true, "Get the response header is normal");
+						}
+						else
+						{
+							return new Tuple<bool, string>(false, $"Get the response header is error ({response.StatusCode} - {response.ReasonPhrase})");
+						}
+					}
+					else
+					{
+						HttpResponseMessage response = await client.GetAsync(videoUrl);
+						if (response.IsSuccessStatusCode)
+						{
+							if (response.Content.Headers.ContentType != null && response.Content.Headers.ContentType.MediaType!.StartsWith("video/"))
+							{
+								return new Tuple<bool, string>(true, "The response content is obtained in video format");
+							}
+							else
+							{
+								string responseBody = await response.Content.ReadAsStringAsync();
+								if (!string.IsNullOrWhiteSpace(responseBody))
+								{
+									return new Tuple<bool, string>(true, "The response body was successfully");
+								}
+								else
+								{
+									return new Tuple<bool, string>(false, "The response body was failure");
+								}
+							}
+						}
+						else
+						{
+							return new Tuple<bool, string>(false, $"Get the response header is error ({response.StatusCode} - {response.ReasonPhrase})");
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				return new Tuple<bool, string>(false, $"Exception ({ex.Message})");
+			}
 		}
 
 	}
