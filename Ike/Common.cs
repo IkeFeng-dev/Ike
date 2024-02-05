@@ -94,5 +94,19 @@ namespace Ike
 		{
 			return ContainsChines(ch.ToString());
 		}
+
+		/// <summary>
+		/// 匹配两个字符串
+		/// </summary>
+		/// <param name="content">匹配内容</param>
+		/// <param name="pattern">匹配<paramref name="content"/>的字符串,可使用一般通配符</param>
+		/// <param name="ignoreCase">匹配是否不区分大小写,<see langword="true"/>:不区分,  <see langword="false"/>:区分</param>
+		/// <returns></returns>
+		public static bool WildcardMatch(string content, string pattern, bool ignoreCase)
+		{
+			RegexOptions options = ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None;
+			pattern = '^' + pattern.Replace("*", ".*").Replace('?', '.') + '$';
+			return Regex.IsMatch(content, pattern, options);
+		}
 	}
 }

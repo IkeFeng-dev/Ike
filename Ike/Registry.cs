@@ -8,7 +8,7 @@ namespace Ike
 	public class Registry
 	{
 		/// <summary>
-		/// 启用USB (管理员权限运行)
+		/// 启用USB <b>(管理员权限运行)</b>
 		/// </summary>
 		/// <returns></returns>
 		public static bool EnableUSB()
@@ -25,7 +25,7 @@ namespace Ike
 		}
 
 		/// <summary>
-		/// 禁用USB (管理员权限运行)
+		/// 禁用USB <b>(管理员权限运行)</b>
 		/// </summary>
 		/// <returns></returns>
 		public static bool DisableUSB()
@@ -40,8 +40,6 @@ namespace Ike
 			}
 			return false;
 		}
-
-
 
 	}
 }
