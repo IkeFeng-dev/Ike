@@ -315,5 +315,21 @@ namespace Ike
 			return result;
 		}
 
+		/// <summary>
+		/// 字符串转<see  langword="byte[]"/>
+		/// </summary>
+		/// <param name="str">字符串</param>
+		/// <param name="encoding">编码</param>
+		/// <returns></returns>
+		public static byte[] StringToBytes(this string str,Encoding encoding)
+		{
+			return encoding.GetBytes(str);
+		}
+
+		/// <inheritdoc cref="StringToBytes(string,Encoding)"/>
+		public static byte[] ToBytes(this string str,Encoding encoding)
+		{
+			return StringToBytes(str, encoding);
+		}
 	}
 }

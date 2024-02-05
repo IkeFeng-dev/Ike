@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Ike
 {
@@ -211,18 +212,24 @@ namespace Ike
 		/// <summary>
 		/// 获取窗口句柄
 		/// </summary>
-		/// <param name="lpClassName">窗口类名，可以为 <see langword="null"/></param>
-		/// <param name="lpWindowName">窗口标题，可以为 <see langword="null"/></param>
+		/// <param name="lpClassName">窗口类名,可以为 <see langword="null"/></param>
+		/// <param name="lpWindowName">窗口标题,可以为 <see langword="null"/></param>
+		/// <remarks>
+		/// 这是一个用于查找窗口句柄的 Windows API 函数,它接受窗口类名和窗口标题作为参数
+		/// </remarks>
 		/// <returns>如果找到匹配的窗口，则返回窗口的句柄；如果未找到匹配的窗口，则返回<see cref=" IntPtr.Zero"/></returns>
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
 		/// <summary>
-		/// 设置窗体的显示与隐藏
+		/// 设置窗体状态
 		/// </summary>
 		/// <param name="hWnd">要操作的窗口的句柄</param>
 		/// <param name="nCmdShow">指定窗口的显示方式，通常使用(<see langword="0x00"/>=隐藏,<see langword="0x01"/>=普通,<see langword="0x02"/>=最小化,<see langword="0x03"/>=最大化)
 		/// </param>
+		/// <remarks>
+		/// 这是一个用于隐藏,显示或设置窗体状态的 Windows API 函数,它接受窗口句柄和显示状态参数作为参数
+		/// </remarks>
 		/// <returns>如果成功,返回 <see langword="true"/>;如果失败,返回 <see langword="false"/></returns>
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern bool ShowWindow(IntPtr hWnd, uint nCmdShow);
@@ -233,6 +240,9 @@ namespace Ike
 		/// <param name="target">目标地址</param>
 		/// <param name="source">源地址</param>
 		/// <param name="length">数据长度</param>
+		/// <remarks>
+		/// 这是一个用于复制内存块的 Windows API 函数,它接受目标内存块的指针,源内存块的指针以及要复制的字节数作为参数
+		/// </remarks>
 		[DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", CharSet = CharSet.Ansi)]
 		public static extern void CopyMemory(IntPtr target, IntPtr source, int length);
 
@@ -279,21 +289,30 @@ namespace Ike
 		/// 获取指定模块的句柄
 		/// </summary>
 		/// <param name="name">要查找的模块名称,通常是进程的可执行文件名称(例如pro.exe)</param>
+		/// <remarks>
+		/// 这是一个用于获取指定模块句柄的 Windows API 函数,它接受模块的名称作为参数
+		/// 如果函数成功,则返回指定模块的句柄;如果函数失败,则返回 <see cref="IntPtr.Zero"/>
+		/// </remarks>
 		/// <returns>指定模块的句柄</returns>
 		[DllImport("kernel32.dll")]
 		public static extern IntPtr GetModuleHandle(string name);
 
 
 		/// <summary>
-		/// 模拟鼠标操作的函数,用于发送鼠标事件
+		/// 模拟鼠标事件
 		/// </summary>
-		/// <param name="dwFlags">指定鼠标事件的标志</param>
-		/// <param name="dx">鼠标事件发生的横坐标</param>
-		/// <param name="dy">鼠标事件发生的纵坐标</param>
-		/// <param name="cButtons">鼠标事件涉及的按钮数量</param>
-		/// <param name="dwExtraInfo">与鼠标事件相关的附加信息</param>
+		/// <param name="dwFlags">指定鼠标事件的标志,如 MOUSEEVENTF_LEFTDOWN,MOUSEEVENTF_MOVE 等</param>
+		/// <param name="dx">指定鼠标事件的水平坐标或移动的相对距离</param>
+		/// <param name="dy">指定鼠标事件的垂直坐标或移动的相对距离</param>
+		/// <param name="cButtons">指定按下或释放的鼠标按钮的数量</param>
+		/// <param name="dwExtraInfo">指定与鼠标事件相关的附加信息</param>
+		/// <returns>如果函数成功，则返回非零值;如果函数失败，则返回0</returns>
+		/// <remarks>
+		/// 这是一个用于模拟鼠标事件的 Windows API 函数,它接受鼠标事件的标志,水平坐标,垂直坐标,鼠标按钮数量和附加信息作为参数
+		/// </remarks>
 		[DllImport("user32.dll")]
 		public static extern int mouse_event(MouseFlags dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
 
 		/// <summary>
 		/// 检索特定已知文件夹(known folder)的路径
@@ -305,6 +324,157 @@ namespace Ike
 		/// <returns></returns>
 		[DllImport("shell32.dll", CharSet = CharSet.Unicode)]
 		public static extern int GetKnownFolderPath([MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags, IntPtr hToken, out string pszPath);
+
+		/// <summary>
+		/// 查找窗体中指定控件句柄
+		/// </summary>
+		/// <param name="parent">窗体句柄</param>
+		/// <param name="child">子控件句柄</param>
+		/// <param name="className">子控件类名</param>
+		/// <param name="captionName">子控件名称</param>
+		/// <returns></returns>
+		[DllImport("user32.dll", EntryPoint = "FindWindowEx")]
+		public extern static IntPtr FindWindowEx(IntPtr parent, IntPtr child, string className, string captionName);
+
+		/// <summary>
+		/// 向窗体发送指定信息
+		/// </summary>
+		/// <param name="hWnd">句柄参数,表示窗口句柄,即指向窗口的一个标识符</param>
+		/// <param name="msg">消息参数,表示要发送的消息代码</param>
+		/// <param name="wParam">通常用于传递附加信息</param>
+		/// <param name="lParam">通常用于传递字符串信息</param>
+		/// <remarks>
+		/// 这是一个用于向指定窗口发送消息的 Windows API 函数 它接受窗口句柄,消息类型,附加消息信息和包含消息数据的字符串作为参数
+		/// </remarks>
+		/// <returns>函数返回一个整数</returns>
+		[DllImport("User32.dll", EntryPoint = "SendMessage")]
+		public static extern int SendMessage(IntPtr hWnd, int msg, IntPtr wParam, string lParam);
+
+		/// <summary>
+		/// 向指定窗口发送消息
+		/// </summary>
+		/// <param name="handle">要接收消息的窗口的句柄</param>
+		/// <param name="wMsg">指定消息的类型</param>
+		/// <param name="wParam">指定附加的消息信息</param>
+		/// <param name="lParam">指向包含消息数据的 StringBuilder 对象</param>
+		/// <remarks>
+		/// 这是一个用于向指定窗口发送消息的 Windows API 函数 它接受窗口句柄,消息类型,附加消息信息和指向包含消息数据的 <see cref="StringBuilder"/> 对象作为参数
+		/// </remarks>
+		[DllImport("user32.dll", EntryPoint = "SendMessage")]
+		private static extern void SendMessage(IntPtr handle, int wMsg, int wParam, StringBuilder lParam);
+
+
+		/// <summary>
+		/// 设置窗口的位置和大小,以及其他窗口状态的方法
+		/// </summary>
+		/// <param name="hWnd">要设置位置和大小的窗口的句柄</param>
+		/// <param name="hWndInsertAfter">在 Z 轴顺序中,窗口将被放置在该窗口之后,可以为特殊值,如 <seealso cref="IntPtr.Zero"/></param>
+		/// <param name="x">窗口的新 X 坐标</param>
+		/// <param name="y">窗口的新 Y 坐标</param>
+		/// <param name="cx">窗口的新宽度</param>
+		/// <param name="cy">窗口的新高度</param>
+		/// <param name="uFlags">指定窗口位置的一组标志,如 SWP_NOMOVE SWP_NOSIZE 等</param>
+		/// <returns>如果函数成功,则返回 <see langword="true"/>;如果函数失败,则返回 <see langword="false"/></returns>
+		[DllImport("user32.dll ")]
+		public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint uFlags);
+
+		/// <summary>
+		/// 坐标数据
+		/// </summary>
+		[StructLayout(LayoutKind.Sequential)]
+		public struct RECT
+		{
+			/// <summary>
+			/// 最左坐标
+			/// </summary>
+			public int Left;
+			/// <summary>
+			/// 最上坐标
+			/// </summary>
+			public int Top;
+			/// <summary>
+			/// 最右坐标
+			/// </summary>
+			public int Right;
+			/// <summary>
+			/// 最下坐标
+			/// </summary>
+			public int Bottom;
+		}
+
+		/// <summary>
+		/// 获取指定窗口的矩形区域信息
+		/// </summary>
+		/// <param name="hWnd">要获取矩形区域信息的窗口的句柄</param>
+		/// <param name="lpRect">指向一个 <see cref="RECT"/> 结构的引用,用于接收窗口的矩形区域信息</param>
+		/// <returns>如果获取成功,则返回 <see langword="true"/>;如果函数失败,则返回 <see langword="false"/></returns>
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		public static extern bool GetWindowRect(IntPtr hWnd, ref RECT lpRect);
+
+
+		/// <summary>
+		/// 获取当前具有焦点的窗口的句柄
+		/// </summary>
+		/// <remarks>
+		/// 这是一个用于获取当前具有焦点窗口句柄的 Windows API 函数,它不需要任何参数,直接返回当前具有焦点的窗口的句柄 如果没有窗口具有焦点,函数将返回 <see cref="IntPtr.Zero"/>
+		/// </remarks>
+		/// <returns>如果函数成功,则返回具有焦点的窗口的句柄;如果没有焦点的窗口,则返回 <see cref="IntPtr.Zero"/></returns>
+		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+		public static extern IntPtr GetForegroundWindow();
+
+
+		/// <summary>
+		/// 获取与指定窗口关联的线程标识和进程标识
+		/// </summary>
+		/// <param name="hwnd">要获取线程和进程标识的窗口的句柄</param>
+		/// <param name="ID">一个输出参数,用于接收窗口关联的进程标识</param>
+		/// <remarks>
+		/// 这是一个用于获取与指定窗口关联的线程标识和进程标识的 Windows API 函数 它接受窗口句柄作为输入,并通过输出参数 <paramref name="ID"/> 返回与该窗口关联的进程标识
+		/// </remarks>
+		/// <returns>返回与窗口关联的线程标识</returns>
+		[DllImport("User32.dll", CharSet = CharSet.Auto)]
+		private static extern int GetWindowThreadProcessId(IntPtr hwnd, out int ID);
+
+
+		/// <summary>
+		/// 向 INI 文件中写入指定的键和值,如果文件不存在,会创建文件;如果键已经存在,会更新键的值
+		/// </summary>
+		/// <param name="section">要写入的键所在的节名称</param>
+		/// <param name="key">要写入的项的名称</param>
+		/// <param name="val">要写入的项的新字符串</param>
+		/// <param name="filePath">INI 文件的完整路径</param>
+		/// <remarks>
+		/// <list type="bullet">
+		/// <item>如果指定的 INI 文件不存在,此函数会创建文件</item>
+		/// <item>如果指定的键已经存在,此函数会更新键的值</item>
+		/// <item>如果 INI 文件中指定的节和键不存在,此函数会创建它们</item>
+		/// </list>
+		/// </remarks>
+		/// <returns>如果函数成功,则返回 <seealso langword="true"/>;否则,返回 <seealso langword="false"/></returns>
+		[DllImport("kernel32")]
+		public static extern bool WritePrivateProfileString(byte[] section, byte[] key, byte[] val, string filePath);
+
+
+		/// <summary>
+		/// 从 INI 文件中检索指定的键的值
+		/// </summary>
+		/// <param name="section">要检索的键所在的节名称</param>
+		/// <param name="key">要检索的项的名称</param>
+		/// <param name="def">如果在文件中找不到指定的键，则返回的默认值</param>
+		/// <param name="retVal">用于保存返回的字符串值的缓冲区</param>
+		/// <param name="size">缓冲区大小,用于保存返回的字符串</param>
+		/// <param name="filePath">INI 文件的完整路径</param>
+		/// <remarks>
+		///   <list type="bullet">
+		///     <item>如果找不到指定的键,则返回默认值<paramref name="def"/></item>
+		///     <item>如果找到指定的键,但其值为空字符串,则返回空字符串</item>
+		///     <item>如果 INI 文件或指定的节和键不存在,或者发生其他错误,函数将返回空字符串</item>
+		///   </list>
+		/// </remarks>
+		/// <returns>从 INI 文件中检索到的字符串值</returns>
+		[DllImport("kernel32")]
+		public static extern int GetPrivateProfileString(byte[] section, byte[] key, byte[] def, byte[] retVal, int size, string filePath);
 
 	}
 }

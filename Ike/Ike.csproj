@@ -52,6 +52,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Resources\handle64.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\handle64.exe" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
