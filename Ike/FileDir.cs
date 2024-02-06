@@ -237,5 +237,9 @@ namespace Ike
 			return WinAPI.WritePrivateProfileString(section.ToBytes(encoding), key.ToBytes(encoding), value.ToBytes(encoding), filePath);
 		}
 
+
+
+
+
 	}
 }

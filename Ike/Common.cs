@@ -108,5 +108,39 @@ namespace Ike
 			pattern = '^' + pattern.Replace("*", ".*").Replace('?', '.') + '$';
 			return Regex.IsMatch(content, pattern, options);
 		}
+
+
+		/// <summary>
+		/// 设置屏幕不休眠
+		/// </summary>
+		/// <remarks>
+		/// <list type="bullet">
+		/// <item>表示是否应该同时保持屏幕不关闭</item>
+		/// <item>设置此线程此时开始一直将处于运行状态,此时计算机不应该进入睡眠状态,此线程退出后,设置将失效</item>
+		/// <item>对于游戏 视频和演示相关的任务需要保持屏幕不关闭;而对于后台服务,下载和监控等任务则不需要</item>
+		/// </list>
+		/// </remarks>
+		/// <returns>调用 <see cref="WinAPI.SetThreadExecutionState"/> 函数实现,并返回先前的执行状态</returns>
+		public static WinAPI.ExecutionState ScreenNotSleep()
+		{
+			return WinAPI.SetThreadExecutionState(WinAPI.ExecutionState.Continuous | WinAPI.ExecutionState.SystemRequired | WinAPI.ExecutionState.DisplayRequired);
+		}
+
+		/// <summary>
+		/// 恢复此线程的运行状态,操作系统现在可以正常进入睡眠状态和关闭屏幕
+		/// </summary>
+		/// <returns>调用 <see cref="WinAPI.SetThreadExecutionState"/> 函数实现,并返回先前的执行状态</returns>
+		public static WinAPI.ExecutionState RestoreScreenSleep()
+		{
+			return WinAPI.SetThreadExecutionState(WinAPI.ExecutionState.Continuous);
+		}
+
+
+
+		//public static void StartProces(string processPath)
+		//{ 
+
+		//}
+
 	}
 }

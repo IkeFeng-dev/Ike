@@ -472,9 +472,51 @@ namespace Ike
 		///     <item>如果 INI 文件或指定的节和键不存在,或者发生其他错误,函数将返回空字符串</item>
 		///   </list>
 		/// </remarks>
-		/// <returns>从 INI 文件中检索到的字符串值</returns>
+		/// <returns>从 INI 文件中检索到的字符串的字节长度</returns>
 		[DllImport("kernel32")]
 		public static extern int GetPrivateProfileString(byte[] section, byte[] key, byte[] def, byte[] retVal, int size, string filePath);
+
+		/// <summary>
+		/// <see cref="ExecutionState"/> 枚举标志,表示 <see cref="SetThreadExecutionState"/> 方法的参数,用于指定执行状态
+		/// </summary>
+		[Flags]
+		public enum ExecutionState : uint
+		{
+			/// <summary>
+			/// 通过复位系统空闲定时器,强制系统进入工作状态
+			/// </summary>
+			SystemRequired = 0x01,
+			/// <summary>
+			/// 通过重置显示空闲计时器来强制打开显示
+			/// </summary>
+			DisplayRequired = 0x02,
+			/// <summary>
+			/// 该值不支持,如果<see cref="UserPresent"/> 与其他esFlags值相结合,则调用将失败,没有指定的状态设置
+			/// </summary>
+			[Obsolete("该值不支持")]
+			UserPresent = 0x04,
+			/// <summary>
+			/// 启用离开模式,此值必须指定<see cref="Continuous"/>
+			/// <para />
+			/// 离开模式应该只用于媒体记录和媒体分发应用程序,这些应用程序必须在桌面计算机上执行关键的后台处理,而计算机似乎处于睡眠状态
+			/// </summary>
+			AwaymodeRequired = 0x40,
+			/// <summary>
+			///通知系统正在设置的状态应该保持有效,直到下一次调用使用<see cref="Continuous"/>并且其他状态标志之一被清除
+			/// </summary>
+			Continuous = 0x80000000,
+		}
+
+		/// <summary>
+		///用于控制线程的执行状态,从而影响系统的电源管理行为
+		/// </summary>
+		/// <param name="esFlags">枚举标志</param>
+		/// <returns></returns>
+		[DllImport("kernel32")]
+		public static extern ExecutionState SetThreadExecutionState(ExecutionState esFlags);
+
+
+
 
 	}
 }
