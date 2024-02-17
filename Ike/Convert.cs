@@ -234,10 +234,10 @@ namespace Ike
 		}
 
 		/// <summary>
-		/// <see cref="System.Drawing.Color"/>转十六进制格式
+		/// <see cref="Color"/>转十六进制格式
 		/// </summary>
 		/// <param name="color">颜色</param>
-		/// <returns>如果<see cref="System.Drawing.Color"/>为<see langword="Empty"/>,则返回[#FFFFFF]</returns>
+		/// <returns>如果<see cref="Color"/>为<see langword="Empty"/>,则返回[#FFFFFF]</returns>
 		public static string ColorToHexlColor(Color color)
 		{
 			string ret = "#FFFFFF";
@@ -321,7 +321,7 @@ namespace Ike
 		/// <param name="str">字符串</param>
 		/// <param name="encoding">编码</param>
 		/// <returns></returns>
-		public static byte[] StringToBytes(this string str,Encoding encoding)
+		public static byte[] StringToBytes(string str,Encoding encoding)
 		{
 			return encoding.GetBytes(str);
 		}

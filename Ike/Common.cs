@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ike
@@ -137,10 +139,116 @@ namespace Ike
 
 
 
-		//public static void StartProces(string processPath)
-		//{ 
+		/// <summary>
+		/// 打开可执行程序,不等待程序结束,无法获取程序返回值
+		/// </summary>
+		/// <param name="processPath">可执行程序路径</param>
+		/// <param name="argument">传递参数,没有则为<see langword="null"></see> </param>
+		public static void OpenProces(string processPath, string? argument)
+		{
+			using (Process process = new())
+			{
+				process.StartInfo = new()
+				{
+					FileName = processPath,
+					Arguments = argument,
+					WorkingDirectory = Path.GetDirectoryName(processPath),
+					UseShellExecute = true,
+				};
+				process.Start();
+			}
+		}
 
-		//}
+
+		/// <summary>
+		/// CMD命令执行类型
+		/// </summary>
+		public enum RunCmdType
+		{
+			/// <summary>
+			/// 启用新窗口独立运行这个命令,返回<see cref="string.Empty"/>
+			/// </summary>
+			IndependentOperation,
+			/// <summary>
+			/// 启用新窗口独立运行这个命令,显示这个窗口,按任意键关闭它,返回<see cref="string.Empty"/>
+			/// </summary>
+			ShowWindow,
+			/// <summary>
+			/// 获取输出文本
+			/// </summary>
+			GetOutputText,
+			/// <summary>
+			/// 结果直接输出到调用程序控制台中,返回<see cref="string.Empty"/>
+			/// </summary>
+			Association,
+			/// <summary>
+			/// 后台执行,不输出结果,不显示窗体,返回<see cref="string.Empty"/>
+			/// </summary>
+			BackgroundExecution,
+		}
+
+		/// <summary>
+		/// 运行命令行指令
+		/// </summary>
+		/// <param name="command">指令</param>
+		/// <param name="workingDirectory">设置工作目录</param>
+		/// <param name="cmdType">执行类型</param>
+		/// <param name="waitForExit">是否等待进程结束,默认值是<see langword="false"/></param>
+		/// <returns></returns>
+		public static string RunCmd(string command, string workingDirectory, RunCmdType cmdType, bool waitForExit = false)
+		{
+			string result = string.Empty;
+			bool isRead = false;
+			ProcessStartInfo info = new ProcessStartInfo()
+			{
+				FileName = "cmd.exe",
+				Arguments = "/c " + command
+			};
+			if (!string.IsNullOrEmpty(workingDirectory))
+			{
+				info.WorkingDirectory = workingDirectory;
+			}
+			switch (cmdType)
+			{
+				case RunCmdType.IndependentOperation:
+					info.UseShellExecute = true;
+					break;
+				case RunCmdType.ShowWindow:
+					info.UseShellExecute = true;
+					info.Arguments = "/c " + command + " & pause>nul";
+					break;
+				case RunCmdType.Association:
+					info.UseShellExecute = false;
+					break;
+				case RunCmdType.BackgroundExecution:
+					info.UseShellExecute = false;
+					info.CreateNoWindow = true;
+					break;
+				case RunCmdType.GetOutputText:
+					info.UseShellExecute = false;
+					info.RedirectStandardOutput = true;
+					info.StandardOutputEncoding = Encoding.UTF8;
+					waitForExit = true;
+					isRead = true;
+					break;
+			}
+			using (Process process = new Process())
+			{
+				process.StartInfo = info;
+				process.Start();
+				if (isRead)
+				{
+					result = process.StandardOutput.ReadToEnd();
+				}
+				if (waitForExit)
+				{
+					process.WaitForExit();
+				}
+			}
+			return result;
+		}
+
+
 
 	}
 }

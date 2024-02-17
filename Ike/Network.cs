@@ -16,7 +16,7 @@ namespace Ike
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
-		private readonly static string[] agents = [
+		private readonly static string[] agents = new string[] {
 		 "Mozilla/4.0 (compatible; MSIE 7.0; windows NT 5.1; NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; Infopath.2)",
 		 "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705",
 		"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
@@ -351,7 +351,7 @@ namespace Ike
 		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.24 (KHTML, like Gecko) Chrome/19.0.1055.1 Safari/535.24 ",
 		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.66 Safari/535.11 ",
 		"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.66 Safari/535.11 ",
-		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.65 Safari/535.11",];
+		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.65 Safari/535.11"};
 
 		/// <summary>
 		/// 浏览器Agents
@@ -548,6 +548,28 @@ namespace Ike
 				return new Tuple<bool, string>(false, $"Exception ({ex.Message})");
 			}
 		}
+
+		/// <summary>
+		/// 判断IPV4格式IP是否为私有地址
+		/// </summary>
+		/// <param name="ipAddress">IP</param>
+		/// <returns></returns>
+		public static bool IsPrivateIPAddress(string ipAddress)
+		{
+			if (IPAddress.TryParse(ipAddress, out IPAddress? parsedIpAddress) && parsedIpAddress != null)
+			{
+				byte[] bytes = parsedIpAddress.GetAddressBytes();
+				if (bytes.Length == 4 &&
+					(bytes[0] == 10 ||
+					 (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+					 (bytes[0] == 192 && bytes[1] == 168)))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 
 	}
 }
