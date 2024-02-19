@@ -144,8 +144,13 @@ namespace Ike
 		/// </summary>
 		/// <param name="processPath">可执行程序路径</param>
 		/// <param name="argument">传递参数,没有则为<see langword="null"></see> </param>
-		public static void OpenProces(string processPath, string? argument)
+		/// <exception cref="FileNotFoundException"></exception>
+		public static void OpenProcess(string processPath, string? argument)
 		{
+			if (!File.Exists(processPath))
+			{
+				throw new FileNotFoundException(processPath);
+			}
 			using (Process process = new())
 			{
 				process.StartInfo = new()
@@ -195,8 +200,13 @@ namespace Ike
 		/// <param name="cmdType">执行类型</param>
 		/// <param name="waitForExit">是否等待进程结束,默认值是<see langword="false"/></param>
 		/// <returns></returns>
-		public static string RunCmd(string command, string workingDirectory, RunCmdType cmdType, bool waitForExit = false)
+		/// <exception cref="ArgumentNullException"></exception>
+		public static string RunCmd(string command, string? workingDirectory, RunCmdType cmdType, bool waitForExit = false)
 		{
+			if (string.IsNullOrWhiteSpace(command))
+			{
+				throw new ArgumentNullException(nameof(command));
+			}
 			string result = string.Empty;
 			bool isRead = false;
 			ProcessStartInfo info = new ProcessStartInfo()
@@ -204,7 +214,7 @@ namespace Ike
 				FileName = "cmd.exe",
 				Arguments = "/c " + command
 			};
-			if (!string.IsNullOrEmpty(workingDirectory))
+			if (!string.IsNullOrWhiteSpace(workingDirectory))
 			{
 				info.WorkingDirectory = workingDirectory;
 			}
@@ -248,6 +258,268 @@ namespace Ike
 			return result;
 		}
 
+		/// <summary>
+		/// 异步运行cmd命令,将内容输出到 <paramref name="outputHandler"/>委托对象
+		/// </summary>
+		/// <param name="cmdCommand">cmd命令</param>
+		/// <param name="outputHandler">输出到委托对象</param>
+		/// <param name="workingDirectory">工作目录</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static async Task RunCmdAsync(string cmdCommand, Action<string?> outputHandler, string? workingDirectory)
+		{
+			if (string.IsNullOrWhiteSpace(cmdCommand))
+			{
+				throw new ArgumentNullException(nameof(cmdCommand));
+			}
+			ArgumentNullException.ThrowIfNull(outputHandler);
+			using Process process = new Process();
+			ProcessStartInfo startInfo = new ProcessStartInfo
+			{
+				FileName = "cmd.exe",
+				Arguments = "/c " + cmdCommand, 
+				UseShellExecute = false,
+				RedirectStandardOutput = true
+			};
+			if (!string.IsNullOrWhiteSpace(workingDirectory))
+			{
+				process.StartInfo.WorkingDirectory = workingDirectory;
+			}
+			process.StartInfo = startInfo;
+			process.OutputDataReceived += (sender, e) =>
+			{
+				if (e.Data != null)
+				{
+					outputHandler.Invoke(e.Data);
+				}
+			};
+			process.Start();
+			process.BeginOutputReadLine();
+			await process.WaitForExitAsync();
+		}
+
+
+
+		/// <summary>
+		/// CMD命令执行类型
+		/// </summary>
+		public enum RunBatType
+		{
+			/// <summary>
+			/// 启用新窗口独立运行这个命令,返回<see cref="string.Empty"/>
+			/// </summary>
+			IndependentOperation,
+			/// <summary>
+			/// 获取输出文本
+			/// </summary>
+			GetOutputText,
+			/// <summary>
+			/// 结果直接输出到调用程序控制台中,返回<see cref="string.Empty"/>
+			/// </summary>
+			Association,
+			/// <summary>
+			/// 后台执行,不输出结果,不显示窗体,返回<see cref="string.Empty"/>
+			/// </summary>
+			BackgroundExecution,
+		}
+
+		/// <summary>
+		/// 运行bat文件
+		/// </summary>
+		/// <param name="batFilePath">bat文件路径</param>
+		/// <param name="batType">执行类型</param>
+		/// <param name="arguments">参数</param>
+		/// <param name="workingDirectory">设置工作目录</param>
+		/// <param name="waitForExit">是否等待进程结束,默认值是<see langword="false"/></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="FileNotFoundException"></exception>
+		public static string RunBat(string batFilePath, RunBatType batType, string? arguments, string? workingDirectory, bool waitForExit = false)
+		{
+			if (string.IsNullOrWhiteSpace(batFilePath))
+			{
+				throw new ArgumentNullException(nameof(batFilePath));
+			}
+			if (!File.Exists(batFilePath))
+			{
+				throw new FileNotFoundException(batFilePath);
+			}
+			string result = string.Empty;
+			bool isRead = false;
+			ProcessStartInfo info = new ProcessStartInfo()
+			{
+				FileName = batFilePath,
+				Arguments = arguments
+			};
+			if (!string.IsNullOrWhiteSpace(workingDirectory))
+			{
+				info.WorkingDirectory = workingDirectory;
+			}
+			switch (batType)
+			{
+				case RunBatType.IndependentOperation:
+					info.UseShellExecute = true;
+					break;
+				case RunBatType.Association:
+					info.UseShellExecute = false;
+					break;
+				case RunBatType.BackgroundExecution:
+					info.UseShellExecute = false;
+					info.CreateNoWindow = true;
+					break;
+				case RunBatType.GetOutputText:
+					info.UseShellExecute = false;
+					info.RedirectStandardOutput = true;
+					info.StandardOutputEncoding = Encoding.UTF8;
+					waitForExit = true;
+					isRead = true;
+					break;
+			}
+			using (Process process = new Process())
+			{
+				process.StartInfo = info;
+				process.Start();
+				if (isRead)
+				{
+					result = process.StandardOutput.ReadToEnd();
+				}
+				if (waitForExit)
+				{
+					process.WaitForExit();
+				}
+			}
+			return result;
+		}
+
+		/// <summary>
+		/// 异步运行bat文件,将内容输出到 <paramref name="outputHandler"/>委托对象
+		/// </summary>
+		/// <param name="batFilePath">bat文件路径</param>
+		/// <param name="outputHandler">输出到委托对象</param>
+		/// <param name="workingDirectory">工作目录</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentNullException"></exception>
+		/// <exception cref="FileNotFoundException"></exception>
+		public static async Task RunBatAsync(string batFilePath, Action<string?> outputHandler, string? workingDirectory)
+		{
+			if (string.IsNullOrWhiteSpace(batFilePath))
+			{
+				throw new ArgumentNullException(nameof(batFilePath));
+			}
+			if (!File.Exists(batFilePath))
+			{
+				throw new FileNotFoundException(batFilePath);
+			}
+			ArgumentNullException.ThrowIfNull(outputHandler);
+			using Process process = new Process();
+			ProcessStartInfo startInfo = new ProcessStartInfo
+			{
+				FileName = batFilePath,
+				UseShellExecute = false,
+				RedirectStandardOutput = true
+			};
+			if (!string.IsNullOrWhiteSpace(workingDirectory))
+			{
+				process.StartInfo.WorkingDirectory = workingDirectory;
+			}
+			process.StartInfo = startInfo;
+			process.OutputDataReceived += (sender, e) =>
+			{
+				if (e.Data != null)
+				{
+					outputHandler.Invoke(e.Data);
+				}
+			};
+			process.Start();
+			process.BeginOutputReadLine();
+			await process.WaitForExitAsync();
+		}
+
+
+		/// <summary>
+		/// 查找字符串中的所有链接,链接结尾是以空格判断结束
+		/// </summary>
+		/// <param name="input">字符串内容</param>
+		/// <returns></returns>
+		public static string[] FindUrls(string input)
+		{
+			Regex regex = new Regex(@"https?://\S+");
+			List<string> urls = new List<string>();
+			foreach (Match match in regex.Matches(input).Cast<Match>())
+			{
+				urls.Add(match.Value);
+			}
+			return urls.ToArray();
+		}
+
+		/// <summary>
+		/// 查找字符串中所有整数
+		/// </summary>
+		/// <param name="input">字符串内容</param>
+		/// <returns></returns>
+		public static string[] FindIntegers(string input)
+		{
+			string pattern = @"-?\b\d+\b";
+			Regex regex = new Regex(pattern);
+			List<string> integers = new List<string>();
+			foreach (Match match in regex.Matches(input))
+			{
+				integers.Add(match.Value);
+			}
+			return integers.ToArray();
+		}
+
+		/// <summary>
+		/// 查找字符串中所有的小数
+		/// </summary>
+		/// <param name="input">字符串内容</param>
+		/// <returns></returns>
+		public static string[] FindDecimals(string input)
+		{
+			string pattern = @"-?\b\d+\.\d+\b";
+			Regex regex = new Regex(pattern);
+			List<string> decimals = new List<string>();
+			foreach (Match match in regex.Matches(input))
+			{
+				decimals.Add(match.Value);
+			}
+			return decimals.ToArray();
+		}
+
+		/// <summary>
+		/// 查找字符串中所有的数值
+		/// </summary>
+		/// <param name="input">字符串内容</param>
+		/// <returns></returns>
+		public static string[] FindNumbers(string input)
+		{
+			Regex regex = new Regex(@"-?\d+(\.\d+)?");
+			List<string> numbers = new List<string>();
+			foreach (Match match in regex.Matches(input))
+			{
+				numbers.Add(match.Value);
+			}
+			return numbers.ToArray();
+		}
+
+		/// <summary>
+		/// 在自定义分隔符中查找值
+		/// </summary>
+		/// <param name="input">字符串内容</param>
+		/// <param name="startDelimiter">起始分隔符</param>
+		/// <param name="endDelimiter">接收分隔符</param>
+		/// <returns></returns>
+		public static string[] FindValuesInCustomDelimiters(string input, string startDelimiter, string endDelimiter)
+		{
+			string pattern = Regex.Escape(startDelimiter) + "(.*?)" + Regex.Escape(endDelimiter);
+			Regex regex = new Regex(pattern);
+			List<string> valuesInCustomDelimiters = new List<string>();
+			foreach (Match match in regex.Matches(input))
+			{
+				valuesInCustomDelimiters.Add(match.Groups[1].Value);
+			}
+			return valuesInCustomDelimiters.ToArray();
+		}
 
 
 	}

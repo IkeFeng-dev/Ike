@@ -1,4 +1,8 @@
-﻿namespace Ike
+﻿using Spectre.Console;
+using System.Text;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace Ike
 {
 	/// <summary>
 	/// 控制台相关操作
@@ -66,6 +70,99 @@
 			{
 				WinAPI.ShowWindow(hWnd, 1);
 			}
+		}
+
+
+		/// <summary>
+		/// 控制台输出日志
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		/// <param name="logType">日志类型</param>
+		public static void Log(string log, Enums.LogType logType)
+		{ 
+		    DateTime dateTime = DateTime.Now;
+			string date = dateTime.ToString("yyyy-MM-dd");
+			string time = dateTime.ToString("HH:mm:ss");
+			if (log.Contains('['))
+			{
+				log = log.Replace("[","[[");
+			}
+			if (log.Contains(']'))
+			{
+				log = log.Replace("]","]]");
+			}
+			string color = "#ffffff";
+			switch (logType)
+			{
+				case Enums.LogType.Verbose:
+					color = "#808080";
+					break;
+				case Enums.LogType.Debug:
+					color = "#0087ff";
+					break;
+				case Enums.LogType.Information:
+					color = "#ffffff";
+					break;
+				case Enums.LogType.Warning:
+					color = "#afaf00";
+					break;
+				case Enums.LogType.Error:
+					color = "#d70087";
+					break;
+				case Enums.LogType.Critical:
+					color = "#d70000";
+					break;
+			}
+			AnsiConsole.MarkupLine(string.Format("[#5f5fd7]{0}[/] [#0087d7]{1}[/] [#e4e4e4]|[/] [{2}]{3}[/] [#e4e4e4]|[/]  {4}", date, time, color, logType.ToString().ToUpper()[..3], log));
+		}
+
+		/// <summary>
+		/// 输出详细信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Verbose(string log)
+		{
+			Log(log,Enums.LogType.Verbose);
+		}
+		/// <summary>
+		/// 输出调试信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Debug(string log)
+		{
+			Log(log,Enums.LogType.Debug);
+		}
+		/// <summary>
+		/// 输出普通信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Information(string log)
+		{
+			Log(log,Enums.LogType.Information);
+		}
+		/// <summary>
+		/// 输出警告信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Warning(string log)
+		{
+			Log(log,Enums.LogType.Warning);
+		}
+		/// <summary>
+		/// 输出错误日志信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Error(string log)
+		{
+			Log(log,Enums.LogType.Error);
+		}
+		/// <summary>
+		/// 输出严重错误信息
+		/// </summary>
+		/// <param name="log">日志内容</param>
+		public static void Critical(string log)
+		{
+			Log(log,Enums.LogType.Critical);
 		}
 	}
 }

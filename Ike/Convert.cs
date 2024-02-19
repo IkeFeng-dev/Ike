@@ -331,5 +331,32 @@ namespace Ike
 		{
 			return StringToBytes(str, encoding);
 		}
+
+		/// <summary>
+		/// 枚举数值转换为枚举值
+		/// </summary>
+		/// <typeparam name="T"><see cref="Enum"/>类型</typeparam>
+		/// <param name="value">值</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
+		public static T ValueToEnum<T>(int value) where T : struct, Enum
+		{
+			if (!typeof(T).IsEnum)
+			{
+				throw new ArgumentException("T must be an enumerated type");
+			}
+			if (!Enum.IsDefined(typeof(T), value))
+			{
+				throw new ArgumentException($"Value {value} is not defined in enum {typeof(T).Name}");
+			}
+			return (T)Enum.ToObject(typeof(T), value);
+		}
+
+		/// <inheritdoc cref="IntToEnum"/>
+		public static T ToEnum<T>(this int value) where T : struct, Enum
+		{
+			return ValueToEnum<T>(value);
+		}
+
 	}
 }
