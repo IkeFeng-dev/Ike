@@ -11,6 +11,17 @@ namespace Ike
 	public static class Common
     {
 		/// <summary>
+		/// 记录取消标志
+		/// </summary>
+		public class CancelToken(bool isCancellationRequested)
+		{
+			/// <summary>
+			/// 是否取消
+			/// </summary>
+			public bool IsCancellationRequested { get; set; } = isCancellationRequested;
+		}
+
+		/// <summary>
 		/// 截取两个字符串之间字符串
 		/// </summary>
 		/// <param name="sourse">文本内容</param>

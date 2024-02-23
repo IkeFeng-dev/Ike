@@ -1,6 +1,5 @@
 ﻿using Spectre.Console;
-using System.Text;
-using static System.Net.Mime.MediaTypeNames;
+using System.Data;
 
 namespace Ike
 {
@@ -163,6 +162,40 @@ namespace Ike
 		public static void Critical(string log)
 		{
 			Log(log,Enums.LogType.Critical);
+		}
+
+		/// <summary>
+		/// 将<see cref="DataTable"/>数据输出到控制台
+		/// </summary>
+		/// <param name="dataTable">表</param>
+		public static void WriteDataTable(DataTable dataTable)
+		{
+			WriteDataTable(dataTable, TableBorder.Ascii);
+		}
+
+		/// <summary>
+		/// 将<see cref="DataTable"/>数据输出到控制台
+		/// </summary>
+		/// <param name="dataTable">表</param>
+		/// <param name="border">边框样式</param>
+		public static void WriteDataTable(DataTable dataTable, TableBorder border)
+		{
+			var table = new Table();
+			table.Border(border);
+			foreach (DataColumn column in dataTable.Columns)
+			{
+				table.AddColumn(column.ColumnName);
+			}
+			foreach (DataRow row in dataTable.Rows)
+			{
+				var values = new List<string>();
+				foreach (DataColumn column in dataTable.Columns)
+				{
+					values.Add(row[column].ToString()??"NULL");
+				}
+				table.AddRow(values.ToArray());
+			}
+			AnsiConsole.Write(table);
 		}
 	}
 }

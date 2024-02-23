@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 
 namespace Ike
 {
-    /// <summary>
-    /// 网络相关操作
-    /// </summary>
-    public class Network
-    {
+	/// <summary>
+	/// 网络相关操作
+	/// </summary>
+	public class Network
+	{
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
@@ -356,8 +353,8 @@ namespace Ike
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
-		public static string[] Agents { get { return agents; } }		
-		
+		public static string[] Agents { get { return agents; } }
+
 		/// <summary>
 		/// 检测URL是否有效,使用<see langword="GET"/> 方法请求
 		/// </summary>
@@ -569,6 +566,66 @@ namespace Ike
 			}
 			return false;
 		}
+
+
+
+		/// <summary>
+		/// 绑定接收套接字数据,接收后立即关闭连接,不会返回如何内容,只用于接收数据
+		/// </summary>
+		/// <param name="port">端口号</param>
+		/// <param name="dataReceivedCallback">委托接收事件,委托中<see langword="int"/>[1=接收数据,0=运行信息,-1=异常]</param>
+		/// <param name="maxListen">最大监听数</param>
+		/// <param name="encoding">解码编码</param>
+		/// <param name="cancelToken">指示标记调用处取消任务,实际断开需要等待下一次客户端连接时才会生效</param>
+		/// <param name="bufferSize">缓存区大小</param>
+		/// <returns></returns>
+		public static async Task ReceiveSocketData(int port, Action<string?, int> dataReceivedCallback, int maxListen, Encoding encoding, Common.CancelToken cancelToken, int bufferSize = 1024)
+		{
+			await Task.Run(() =>
+			{
+				using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+				{
+					IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, port);
+					listener.Bind(localEndPoint);
+					listener.Listen(maxListen);
+					dataReceivedCallback?.Invoke($"服务正在侦听 {localEndPoint}", 0);
+					while (true)
+					{
+						try
+						{
+							dataReceivedCallback?.Invoke("等待连接", 0);
+							using (Socket clientSocket = listener.Accept())
+							{
+								if (cancelToken.IsCancellationRequested)
+								{
+									break;
+								}
+								EndPoint? endPoint = clientSocket.LocalEndPoint;
+								string? connectIP = "";
+								if (endPoint != null)
+								{
+									connectIP = endPoint.ToString();
+								}
+								byte[] buffer = new byte[bufferSize];
+								int bytesRead = clientSocket.Receive(buffer);
+								string message = encoding.GetString(buffer, 0, bytesRead).Trim();
+								dataReceivedCallback?.Invoke(message, 1);
+								clientSocket.Close();
+								dataReceivedCallback?.Invoke($"断开连接 {connectIP}", 0);
+							}
+						}
+						catch (Exception ex) 
+						{
+							dataReceivedCallback?.Invoke(ex.ToString(), -1);
+						}
+					}
+					dataReceivedCallback?.Invoke("取消侦听", 0);
+				}
+			});
+		}
+
+		
+
 
 
 	}

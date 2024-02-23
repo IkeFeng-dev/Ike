@@ -352,7 +352,7 @@ namespace Ike
 			return (T)Enum.ToObject(typeof(T), value);
 		}
 
-		/// <inheritdoc cref="IntToEnum"/>
+		/// <inheritdoc cref="ValueToEnum"/>
 		public static T ToEnum<T>(this int value) where T : struct, Enum
 		{
 			return ValueToEnum<T>(value);
