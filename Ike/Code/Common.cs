@@ -1,10 +1,7 @@
 ﻿using PuppeteerSharp;
-using System;
 using System.Diagnostics;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace Ike
 {
