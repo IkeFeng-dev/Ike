@@ -573,7 +573,12 @@ namespace Ike
 		/// 绑定接收套接字数据,接收后立即关闭连接,不会返回如何内容,只用于接收数据
 		/// </summary>
 		/// <param name="port">端口号</param>
-		/// <param name="dataReceivedCallback">委托接收事件,委托中<see langword="int"/>[1=接收数据,0=运行信息,-1=异常]</param>
+		/// <param name="dataReceivedCallback">委托接收事件,委托中<see langword="int"/>值对应:<list type="table">
+		/// <item><see langword="int"/> = 1  [接收到数据]</item>
+		/// <item><see langword="int"/> = 0  [运行信息]</item>
+		/// <item><see langword="int"/> = -1  [捕获异常]</item>
+		/// </list>
+		/// </param>
 		/// <param name="maxListen">最大监听数</param>
 		/// <param name="encoding">解码编码</param>
 		/// <param name="cancelToken">指示标记调用处取消任务,实际断开需要等待下一次客户端连接时才会生效</param>
@@ -619,12 +624,28 @@ namespace Ike
 							dataReceivedCallback?.Invoke(ex.ToString(), -1);
 						}
 					}
-					dataReceivedCallback?.Invoke("取消侦听", 0);
+					dataReceivedCallback?.Invoke("终止侦听", 0);
 				}
 			});
 		}
 
-		
+		/// <summary>
+		/// 异步获取网页Html内容
+		/// </summary>
+		/// <param name="url">网址</param>
+		/// <param name="encoding">编码</param>
+		/// <returns></returns>
+		public static async Task<string> GetHtmlAsync(string url, Encoding encoding)
+		{
+			using (HttpClient client = new HttpClient())
+			{
+				HttpResponseMessage response = await client.GetAsync(url);
+				response.EnsureSuccessStatusCode();
+				byte[] bytes = await response.Content.ReadAsByteArrayAsync();
+				string html = encoding.GetString(bytes);
+				return html;
+			}
+		}
 
 
 

@@ -21,9 +21,9 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Description>.NET 8.0 通用方法库,包括但不限于SFTP,转换,加解密,网络,WindowsAPI,注册表,反射,数据库...</Description>
-    <FileVersion>1.0.0.5</FileVersion>
-    <AssemblyVersion>1.0.0.5</AssemblyVersion>
-    <Version>1.0.5</Version>
+    <FileVersion>1.0.0.6</FileVersion>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -68,10 +68,13 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageReference Include="PuppeteerSharp" Version="14.1.0" />
     <PackageReference Include="Spectre.Console" Version="0.48.0" />
+    <PackageReference Include="Spectre.Console.ImageSharp" Version="0.48.0" />
     <PackageReference Include="SSH.NET" Version="2023.0.1" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="System.Drawing.Common" Version="8.0.1" />
+    <PackageReference Include="YamlDotNet" Version="15.1.1" />
   </ItemGroup>
 
   <ItemGroup>

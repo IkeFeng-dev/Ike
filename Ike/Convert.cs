@@ -1,6 +1,9 @@
 ﻿using System.Drawing;
 using System.Text;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
 
 namespace Ike
 {
@@ -287,8 +290,9 @@ namespace Ike
 		/// ObjectToJson方法内部缓存对象
 		/// </summary>
 		private static readonly JsonSerializerOptions jsonSerializerOptions = new() { WriteIndented = true };
+
 		/// <summary>
-		/// <see cref="object"/>转<see  langword="Json"/>字符串
+		/// <see cref="object"/>转JSON字符串
 		/// </summary>
 		/// <param name="obj">转换对象</param>
 		/// <returns></returns>
@@ -356,6 +360,39 @@ namespace Ike
 		public static T ToEnum<T>(this int value) where T : struct, Enum
 		{
 			return ValueToEnum<T>(value);
+		}
+
+		/// <summary>
+		/// <see cref="object"/>转YAML数据
+		/// </summary>
+		/// <param name="data">数据对象</param>
+		/// <returns>序列号后的字符串</returns>
+		public static string ObjectToYaml(object data)
+		{
+			var serializer = new SerializerBuilder()
+				.WithNamingConvention(CamelCaseNamingConvention.Instance)
+				.Build();
+			return serializer.Serialize(data);
+		}
+
+		/// <inheritdoc cref="ObjectToYaml"/>
+		public static string ToYaml(this object data)
+		{
+			return ObjectToYaml(data);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="yaml"></param>
+		/// <returns></returns>
+		public static T YamlToObject<T>(string yaml)
+		{
+			var deserializer = new DeserializerBuilder()
+				.WithNamingConvention(CamelCaseNamingConvention.Instance)
+				.Build();
+			return deserializer.Deserialize<T>(yaml);
 		}
 
 	}

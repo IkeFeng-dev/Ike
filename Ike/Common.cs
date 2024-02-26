@@ -1,7 +1,10 @@
-﻿using System;
+﻿using PuppeteerSharp;
+using System;
 using System.Diagnostics;
+using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Ike
 {
@@ -531,6 +534,116 @@ namespace Ike
 			}
 			return valuesInCustomDelimiters.ToArray();
 		}
+
+		/// <summary>
+		/// 保存Html页面到图像文件
+		/// </summary>
+		/// <param name="html">Html代码</param>
+		/// <param name="width">图像宽</param>
+		/// <param name="height">图像高</param>
+		/// <param name="type">图像类型</param>
+		/// <param name="outputFile">输出路径</param>
+		/// <returns></returns>
+		public static async Task SaveHtmlToImage(string html, ScreenshotType type, int width, int height, string outputFile)
+		{
+			await new BrowserFetcher().DownloadAsync();
+			var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+			using (var page = await browser.NewPageAsync())
+			{
+				await page.SetViewportAsync(new ViewPortOptions
+				{
+					Width = width,
+					Height = height
+				});
+				await page.SetContentAsync(html);
+				ScreenshotOptions screenshotOptions = new ScreenshotOptions()
+				{
+					FullPage = true,
+					Type = type,
+					OmitBackground = true
+				};
+				if (type != ScreenshotType.Png)
+				{
+					screenshotOptions.Quality = 100;
+				}
+				await page.ScreenshotAsync(outputFile, screenshotOptions);
+			}
+		}
+
+		/// <summary>
+		/// 保存Html页面到图像文件
+		/// </summary>
+		/// <param name="url">Html链接地址</param>
+		/// <param name="width">图像宽</param>
+		/// <param name="height">图像高</param>
+		/// <param name="type">图像类型</param>
+		/// <param name="outputFile">输出路径</param>
+		/// <param name="timeout">获取Html的超时时间(ms),0表示无期限等待</param>
+		/// <returns></returns>
+		public static async Task SaveHtmlToImage(Uri url, ScreenshotType type, int width, int height, string outputFile,int timeout = 30000)
+		{
+			using var browserFetcher = new BrowserFetcher();
+			await browserFetcher.DownloadAsync();
+			var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+			{
+				Headless = true
+			});
+			using (var page = await browser.NewPageAsync())
+			{
+				await page.SetViewportAsync(new ViewPortOptions
+				{
+					Width = width,
+					Height = height
+				});
+				await page.GoToAsync(url.AbsoluteUri,timeout: timeout);
+				ScreenshotOptions screenshotOptions = new ScreenshotOptions()
+				{
+					FullPage = true,
+					Type = type,
+					OmitBackground = true,
+				};
+				await page.ScreenshotAsync(outputFile, screenshotOptions);
+			}
+		}
+
+		/// <summary>
+		/// 保存Html页面到PDF文件
+		/// </summary>
+		/// <param name="html">Html代码</param>
+		/// <param name="outputFile">输出路径</param>
+		/// <returns></returns>
+		public static async Task SaveHtmlToPDF(string html, string outputFile)
+		{
+			await new BrowserFetcher().DownloadAsync();
+			var browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+			using (var page = await browser.NewPageAsync())
+			{
+				await page.SetContentAsync(html);
+				await page.PdfAsync(outputFile);
+			}
+		}
+
+		/// <summary>
+		/// 保存Html页面到PDF文件
+		/// </summary>
+		/// <param name="url">Html链接地址</param>
+		/// <param name="outputFile">输出路径</param>
+		/// <param name="timeout">获取Html的超时时间(ms),0表示无期限等待</param>
+		/// <returns></returns>
+		public static async Task SaveHtmlToPDF(Uri url, string outputFile, int timeout = 30000)
+		{
+			using var browserFetcher = new BrowserFetcher();
+			await browserFetcher.DownloadAsync();
+			var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+			{
+				Headless = true
+			});
+			var page = await browser.NewPageAsync();
+			await page.GoToAsync(url.AbsoluteUri, timeout: timeout);
+			await page.PdfAsync(outputFile);
+		}
+
+
 
 
 	}

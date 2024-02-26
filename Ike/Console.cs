@@ -197,5 +197,26 @@ namespace Ike
 			}
 			AnsiConsole.Write(table);
 		}
+
+		/// <summary>
+		/// 显示像素图像到控制台
+		/// </summary>
+		/// <param name="imagePath">图像路径</param>
+		/// <param name="maxWidth">图像最大宽度,0则以最大宽度显示</param>
+		/// <exception cref="FileNotFoundException"></exception>
+		public static void ShowPixelImage(string imagePath,int maxWidth = 0)
+		{
+			if (!File.Exists(imagePath))
+			{
+				throw new FileNotFoundException(imagePath);
+			}
+			var image = new CanvasImage(imagePath);
+			if (maxWidth > 0)
+			{
+				image.MaxWidth(maxWidth);
+			}
+			AnsiConsole.Write(image);
+		}
+
 	}
 }
