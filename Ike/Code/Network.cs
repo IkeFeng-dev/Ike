@@ -10,6 +10,7 @@ namespace Ike
 	/// </summary>
 	public class Network
 	{
+		#region 浏览器Agents
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
@@ -350,6 +351,8 @@ namespace Ike
 		"Mozilla/5.0 (Windows NT 6.2) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.66 Safari/535.11 ",
 		"Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.65 Safari/535.11"};
 
+		#endregion
+
 		/// <summary>
 		/// 浏览器Agents
 		/// </summary>
@@ -648,6 +651,60 @@ namespace Ike
 		}
 
 
+		/// <summary>
+		/// 检测指定端口号是否打开
+		/// </summary>
+		/// <param name="ip">IP</param>
+		/// <param name="port">端口号</param>
+		/// <param name="timeoutMilliseconds">超时时间,毫秒</param>
+		/// <returns></returns>
+		public static bool IsPortOpen(string ip, int port, int timeoutMilliseconds)
+		{
+			try
+			{
+				using (TcpClient client = new TcpClient())
+				{
+					client.ReceiveTimeout = timeoutMilliseconds;
+					client.SendTimeout = timeoutMilliseconds;
+					client.Connect(ip, port);
+					return true;
+				}
+			}
+			catch (SocketException)
+			{
+				return false;
+			}
+		}
+
+
+		/// <summary>
+		/// 异步检测指定端口号是否打开
+		/// </summary>
+		/// <param name="ip">IP</param>
+		/// <param name="port">端口号</param>
+		/// <param name="timeoutMilliseconds">超时时间,毫秒</param>
+		/// <returns></returns>
+		public static async Task<bool> IsPortOpenAsync(string ip, int port, int timeoutMilliseconds)
+		{
+			try
+			{
+				using (var client = new TcpClient())
+				{
+					client.ReceiveTimeout = timeoutMilliseconds + 1000;
+					client.SendTimeout = timeoutMilliseconds + 1000;
+					var connectTask = client.ConnectAsync(ip, port);
+					if (await Task.WhenAny(connectTask, Task.Delay(timeoutMilliseconds)) == connectTask && client.Connected)
+					{
+						return true;
+					}
+					return false;
+				}
+			}
+			catch (SocketException)
+			{
+				return false;
+			}
+		}
 
 	}
 }
