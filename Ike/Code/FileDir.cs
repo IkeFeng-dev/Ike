@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Drawing;
 using System.Security.Cryptography;
@@ -42,7 +43,7 @@ namespace Ike
 			{
 				throw new DirectoryNotFoundException(directoryPath);
 			}
-			return [.. Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetCreationTime)];
+			return Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetCreationTime).ToArray();
 		}
 		/// <summary>
 		/// 获取文件夹内文件,按照写入日期排序
@@ -58,7 +59,7 @@ namespace Ike
 			{
 				throw new DirectoryNotFoundException(directoryPath);
 			}
-			return [.. Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetLastWriteTime)];
+			return Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetLastWriteTime).ToArray();
 		}
 		/// <summary>
 		/// 获取文件夹内文件,按照最后修改文件的日期排序
@@ -74,7 +75,7 @@ namespace Ike
 			{
 				throw new DirectoryNotFoundException(directoryPath);
 			}
-			return [.. Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetLastWriteTime)];
+			return Directory.GetFiles(directoryPath, search, select).OrderBy(File.GetLastWriteTime).ToArray();
 		}
 
 		/// <summary>
@@ -89,7 +90,7 @@ namespace Ike
 			{
 				throw new FileNotFoundException(filePath);
 			}
-			List<string> sectionNames = [];
+			List<string> sectionNames = new List<string>();
 			using (StreamReader reader = new(filePath))
 			{
 				string? line;
@@ -117,7 +118,7 @@ namespace Ike
 		{
 			if (!File.Exists(filePath)) throw new FileNotFoundException(filePath);
 			if (string.IsNullOrEmpty(sectionName)) throw new Exception("String cannot be empty.");
-			Dictionary<string, string> keyValues = [];
+			Dictionary<string, string> keyValues = new Dictionary<string, string>();
 			using (StreamReader reader = new(filePath))
 			{
 				string? line;
@@ -151,7 +152,7 @@ namespace Ike
 		/// <returns></returns>
 		public static Dictionary<string, Dictionary<string, string>> GetIniAllKeyValues(string filePath)
 		{
-			Dictionary<string, Dictionary<string, string>> keyValues = [];
+			Dictionary<string, Dictionary<string, string>> keyValues = new Dictionary<string, Dictionary<string, string>>();
 			foreach (string section in GetIniSectionNames(filePath))
 			{
 				keyValues.Add(section, GetIniSectionKeyValues(filePath, section));

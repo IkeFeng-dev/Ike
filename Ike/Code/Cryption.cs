@@ -87,7 +87,7 @@ namespace Ike
 		/// <summary>
 		/// AES加密Key支持的字节长度
 		/// </summary>
-		private static readonly int[] aesKeyByteLength = [16, 24, 32];
+		private static readonly int[] aesKeyByteLength = new int[] { 16, 24, 32 };
 
 		/// <summary>
 		/// AES加密字符串

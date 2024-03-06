@@ -1,27 +1,20 @@
 ﻿using System.Data;
 using System.Data.Common;
 using System.Data.SQLite;
+using System.Drawing.Printing;
 
 namespace Ike
 {
 	/// <summary>
-	/// SQLite数据库操作
+	/// SQLite操作类
 	/// </summary>
-	/// <param name="databasePath">指定数据库文件的路径</param>
-	/// <param name="version">指定 SQLite 数据库引擎的版本号</param>
-	/// <param name="pooling">启用连接池</param>
-	/// <param name="failIfMissing">指示在指定的数据库文件不存在时是否引发错误</param>
-	/// <param name="readOnly">指示是否以只读模式打开数据库</param>
-	/// <param name="pageSize">指定数据库页的大小</param>
-	/// <param name="cacheSize">指定数据库缓存的大小</param>
-	/// <param name="journalMode">指定日志模式,用于控制事务日志的写入方式</param>
-	/// <param name="synchronous">指定同步模式,用于控制事务的提交方式</param>
-	public class SQLite(string databasePath, string version = "3", bool pooling = true, bool failIfMissing = false, bool readOnly = false, int pageSize = 4096, int cacheSize = 2000, SQLite.JournalMode journalMode = SQLite.JournalMode.Delete, SQLite.Synchronous synchronous = SQLite.Synchronous.Full)
+	public class SQLite
 	{
 		/// <summary>
 		/// 数据库连接字符串
 		/// </summary>
-		private readonly string _connectionString = $"Data Source={databasePath};Version={version};Pooling={pooling};FailIfMissing={failIfMissing};ReadOnly={readOnly};PageSize={pageSize};Cache Size={cacheSize};Journal Mode={journalMode};Synchronous={synchronous};";
+		private readonly string? _connectionString;
+
 		/// <summary>
 		/// 数据库连接对象
 		/// </summary>
@@ -76,6 +69,24 @@ namespace Ike
 			/// 标准模式: 每次事务提交后都同步写入数据库文件的主页
 			/// </summary>
 			Normal
+		}
+
+
+		/// <summary>
+		/// SQLite数据库操作
+		/// </summary>
+		/// <param name="databasePath">指定数据库文件的路径</param>
+		/// <param name="version">指定 SQLite 数据库引擎的版本号</param>
+		/// <param name="pooling">启用连接池</param>
+		/// <param name="failIfMissing">指示在指定的数据库文件不存在时是否引发错误</param>
+		/// <param name="readOnly">指示是否以只读模式打开数据库</param>
+		/// <param name="pageSize">指定数据库页的大小</param>
+		/// <param name="cacheSize">指定数据库缓存的大小</param>
+		/// <param name="journalMode">指定日志模式,用于控制事务日志的写入方式</param>
+		/// <param name="synchronous">指定同步模式,用于控制事务的提交方式</param>
+		public SQLite(string databasePath, string version = "3", bool pooling = true, bool failIfMissing = false, bool readOnly = false, int pageSize = 4096, int cacheSize = 2000, SQLite.JournalMode journalMode = SQLite.JournalMode.Delete, SQLite.Synchronous synchronous = SQLite.Synchronous.Full)
+		{
+			_connectionString = $"Data Source={databasePath};Version={version};Pooling={pooling};FailIfMissing={failIfMissing};ReadOnly={readOnly};PageSize={pageSize};Cache Size={cacheSize};Journal Mode={journalMode};Synchronous={synchronous};";
 		}
 
 		/// <summary>
@@ -206,7 +217,7 @@ namespace Ike
 		/// <see cref="Dictionary{TKey, TValue}"/> <see langword="Key"/> 必须是'@username'和'@password',会根据对应的<see langword="Key"/>去设置<see langword="Value"/>
 		/// </code>
 		/// </remarks>
-		public int ExecuteSql(string sqlCommand,Dictionary<string,string> parameters)
+		public int ExecuteSql(string sqlCommand, Dictionary<string, string> parameters)
 		{
 			if (Open())
 			{
@@ -238,16 +249,16 @@ namespace Ike
 			{
 				using (SQLiteCommand cmd = new SQLiteCommand(sqlCommand, connection))
 				{
-						object obj = cmd.ExecuteScalar();
-						if (Equals(obj, null) || Equals(obj, DBNull.Value))
-						{
-							return null;
-						}
-						else
-						{
-							return obj;
-						}
-					
+					object obj = cmd.ExecuteScalar();
+					if (Equals(obj, null) || Equals(obj, DBNull.Value))
+					{
+						return null;
+					}
+					else
+					{
+						return obj;
+					}
+
 				}
 			}
 			return null;
@@ -279,9 +290,9 @@ namespace Ike
 		/// </summary>
 		/// <param name="sqlCommand">SQL语句</param>
 		/// <param name="dataSet">包含查询结果的<see cref="DataSet"/>对象</param>
-		public void ExecutionRead(string sqlCommand,out DataSet dataSet)
+		public void ExecutionRead(string sqlCommand, out DataSet dataSet)
 		{
-			 dataSet = new DataSet();
+			dataSet = new DataSet();
 			if (Open())
 			{
 				using (SQLiteCommand cmd = new SQLiteCommand(sqlCommand, connection))
@@ -311,9 +322,10 @@ namespace Ike
 		/// <returns>将相关表信息储存到<see cref="DataTable"/>中返回</returns>
 		public DataTable GetDatabaseInfo()
 		{
-		     ExecutionRead("SELECT * FROM sqlite_master;", out DataTable dataTable);
+			ExecutionRead("SELECT * FROM sqlite_master;", out DataTable dataTable);
 			return dataTable;
 		}
 
 	}
 }
+

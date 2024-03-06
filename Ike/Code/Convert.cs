@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using System.Text;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization;
 
@@ -53,9 +52,9 @@ namespace Ike
 				fu = true;
 				conv = conv[1..];
 			}
-			string[] num = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
-			string[] digit = ["", "拾", "佰", "仟"];
-			string[] units = ["", ",万,", ",亿,", ",万亿,"];
+			string[] num = new string[] { "零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖" };
+			string[] digit = new string[] { "", "拾", "佰", "仟" };
+			string[] units = new string[] { "", ",万,", ",亿,", ",万亿," };
 			string returnValue = "";
 			int finger = 0;
 			int m = conv.Length % 4;

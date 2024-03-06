@@ -408,29 +408,33 @@ namespace Ike
 		/// <returns>服务器返回的结果</returns>
 		public static async Task<string> PostUploadFileAsync(string url, string filePath, string fileParName, Dictionary<string, object>? parameters, string? renameFile = null)
 		{
-			using HttpClient client = new();
-			using MultipartFormDataContent formData = [];
-			byte[] fileBytes = File.ReadAllBytes(filePath);
-			var fileContent = new ByteArrayContent(fileBytes);
-			string fileName = Path.GetFileName(filePath);
-			if (renameFile != null)
+			using (HttpClient client = new HttpClient())
 			{
-				fileName = renameFile;
-			}
-			formData.Add(fileContent, fileParName, fileName);
-			if (parameters != null)
-			{
-				foreach (var item in parameters)
+				using (MultipartFormDataContent formData = new MultipartFormDataContent())
 				{
-					if (item.Value == null)
+					byte[] fileBytes = File.ReadAllBytes(filePath);
+					var fileContent = new ByteArrayContent(fileBytes);
+					string fileName = Path.GetFileName(filePath);
+					if (renameFile != null)
 					{
-						parameters[item.Key] = "null";
+						fileName = renameFile;
 					}
-					formData.Add(new StringContent(item.Value!.ToString()!), item.Key);
+					formData.Add(fileContent, fileParName, fileName);
+					if (parameters != null)
+					{
+						foreach (var item in parameters)
+						{
+							if (item.Value == null)
+							{
+								parameters[item.Key] = "null";
+							}
+							formData.Add(new StringContent(item.Value!.ToString()!), item.Key);
+						}
+					}
+					var response = await client.PostAsync(url, formData);
+					return await response.Content.ReadAsStringAsync();
 				}
 			}
-			var response = await client.PostAsync(url, formData);
-			return await response.Content.ReadAsStringAsync();
 		}
 		/// <summary>
 		/// 异步调用API上传文件

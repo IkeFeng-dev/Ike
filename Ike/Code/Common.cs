@@ -14,12 +14,34 @@ namespace Ike
 		/// <summary>
 		/// 记录取消标志
 		/// </summary>
-		public class CancelToken(bool isCancellationRequested)
+		public class CancelToken
 		{
+			/// <summary>
+			/// 私有变量
+			/// </summary>
+			private bool _cancelled;
+			/// <summary>
+			/// 记录取消标志
+			/// </summary>
+			/// <param name="isCancellationRequested"></param>
+			public CancelToken(bool isCancellationRequested)
+			{
+				_cancelled = isCancellationRequested;
+			}
 			/// <summary>
 			/// 是否取消
 			/// </summary>
-			public bool IsCancellationRequested { get; set; } = isCancellationRequested;
+			public bool IsCancellationRequested
+			{
+				get
+				{
+					return _cancelled;
+				}
+				set
+				{
+					_cancelled = value;
+				}
+			}
 		}
 
 		/// <summary>
@@ -55,7 +77,7 @@ namespace Ike
 		/// <returns>格式化后的字符串</returns>
 		public static string FormatBytes(long bytes)
 		{
-			string[] suffixes = ["B", "KB", "MB", "GB", "TB", "PB"];
+			string[] suffixes = new string[] { "B", "KB", "MB", "GB", "TB", "PB" };
 			double last = 1;
 			for (int i = 0; i < suffixes.Length; i++)
 			{
@@ -670,7 +692,7 @@ namespace Ike
 		/// Bin文件加载到指针
 		/// </summary>
 		/// <param name="filePath">文件路径</param>
-		/// <returns>指向新分配内存的指针,使用完成后必须使用<see cref="Marshal.FreeHGlobal(nint)"/>方法释放该内存</returns>
+		/// <returns>指向新分配内存的指针,使用完成后必须使用<see cref="Marshal.FreeHGlobal"/>方法释放该内存</returns>
 		/// <exception cref="FileNotFoundException"></exception>
 		public static IntPtr LoadBinFile(string filePath)
 		{
