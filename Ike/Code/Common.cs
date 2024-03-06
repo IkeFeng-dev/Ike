@@ -1,5 +1,6 @@
 ﻿using PuppeteerSharp;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -640,8 +641,48 @@ namespace Ike
 			await page.PdfAsync(outputFile);
 		}
 
+		/// <summary>
+		/// 指针数据写入Bin文件
+		/// </summary>
+		/// <param name="intPtr">指针</param>
+		/// <param name="length">数据长度</param>
+		/// <param name="filePath">保存路径</param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentException"></exception>
+		public static bool IntPtrToFile(IntPtr intPtr, int length, string filePath)
+		{
+			if (intPtr == IntPtr.Zero)
+			{
+				throw new ArgumentException("指针为空", nameof(intPtr));
+			}
+			if (File.Exists(filePath))
+			{
+				File.Delete(filePath);
+			}
+			byte[] buffer = new byte[length];
+			Marshal.Copy(intPtr, buffer, 0, length);
+			File.WriteAllBytes(filePath, buffer);
+			return File.Exists(filePath);
+		}
 
 
+		/// <summary>
+		/// Bin文件加载到指针
+		/// </summary>
+		/// <param name="filePath">文件路径</param>
+		/// <returns>指向新分配内存的指针,使用完成后必须使用<see cref="Marshal.FreeHGlobal(nint)"/>方法释放该内存</returns>
+		/// <exception cref="FileNotFoundException"></exception>
+		public static IntPtr LoadBinFile(string filePath)
+		{
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException(filePath);
+            }
+            byte[] fileBytes = File.ReadAllBytes(filePath);
+			IntPtr intPtr = Marshal.AllocHGlobal(fileBytes.Length);
+			Marshal.Copy(fileBytes, 0, intPtr, fileBytes.Length);
+			return intPtr;
+		}
 
 	}
 }

@@ -656,16 +656,13 @@ namespace Ike
 		/// </summary>
 		/// <param name="ip">IP</param>
 		/// <param name="port">端口号</param>
-		/// <param name="timeoutMilliseconds">超时时间,毫秒</param>
 		/// <returns></returns>
-		public static bool IsPortOpen(string ip, int port, int timeoutMilliseconds)
+		public static bool IsPortOpen(string ip, int port)
 		{
 			try
 			{
 				using (TcpClient client = new TcpClient())
 				{
-					client.ReceiveTimeout = timeoutMilliseconds;
-					client.SendTimeout = timeoutMilliseconds;
 					client.Connect(ip, port);
 					return true;
 				}
@@ -690,8 +687,6 @@ namespace Ike
 			{
 				using (var client = new TcpClient())
 				{
-					client.ReceiveTimeout = timeoutMilliseconds + 1000;
-					client.SendTimeout = timeoutMilliseconds + 1000;
 					var connectTask = client.ConnectAsync(ip, port);
 					if (await Task.WhenAny(connectTask, Task.Delay(timeoutMilliseconds)) == connectTask && client.Connected)
 					{

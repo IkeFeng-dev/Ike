@@ -124,8 +124,11 @@ namespace Ike
 				string? currentSection = null;
 				while ((line = reader.ReadLine()) != null)
 				{
-					line = line.Trim();
-					if (line.StartsWith('[') && line.EndsWith(']'))
+					if (line.StartsWith('#') || line.StartsWith(';'))
+					{
+						continue;
+					}
+					if (line.Trim().StartsWith('[') && line.Trim().EndsWith(']'))
 					{
 						currentSection = line[1..^1];
 					}
