@@ -77,18 +77,22 @@ namespace Ike
 		/// </summary>
 		/// <param name="log">日志内容</param>
 		/// <param name="logType">日志类型</param>
-		public static void Log(string log, Enums.LogType logType)
+		/// <param name="enableMarkup">文本内容启用标记,可以根据<see cref="AnsiConsole"/>指定格式设定文本样式,需要注意的是启用后设置了错误的标记符号会引发异常</param>
+		public static void Log(string log, Enums.LogType logType,bool enableMarkup = false)
 		{ 
 		    DateTime dateTime = DateTime.Now;
 			string date = dateTime.ToString("yyyy-MM-dd");
 			string time = dateTime.ToString("HH:mm:ss");
-			if (log.Contains('['))
+			if (!enableMarkup)
 			{
-				log = log.Replace("[","[[");
-			}
-			if (log.Contains(']'))
-			{
-				log = log.Replace("]","]]");
+				if (log.Contains('['))
+				{
+					log = log.Replace("[", "[[");
+				}
+				if (log.Contains(']'))
+				{
+					log = log.Replace("]", "]]");
+				}
 			}
 			string color = "#ffffff";
 			switch (logType)
@@ -123,6 +127,12 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Verbose);
 		}
+		/// <inheritdoc cref="Verbose"/>
+		public static void OutVerbose(this string log)
+		{
+			Verbose(log);
+		}
+
 		/// <summary>
 		/// 输出调试信息
 		/// </summary>
@@ -131,6 +141,12 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Debug);
 		}
+		/// <inheritdoc cref="Debug"/>
+		public static void OutDebug(this string log)
+		{
+			Debug(log);
+		}
+
 		/// <summary>
 		/// 输出普通信息
 		/// </summary>
@@ -139,6 +155,12 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Information);
 		}
+		/// <inheritdoc cref="Information"/>
+		public static void OutInfo(this string log)
+		{
+			Information(log);
+		}
+
 		/// <summary>
 		/// 输出警告信息
 		/// </summary>
@@ -147,6 +169,12 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Warning);
 		}
+		/// <inheritdoc cref="Warning"/>
+		public static void OutWarning(this string log)
+		{
+			Warning(log);
+		}
+
 		/// <summary>
 		/// 输出错误日志信息
 		/// </summary>
@@ -155,6 +183,12 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Error);
 		}
+		/// <inheritdoc cref="Error"/>
+		public static void OutError(this string log)
+		{
+			Error(log);
+		}
+
 		/// <summary>
 		/// 输出严重错误信息
 		/// </summary>
@@ -163,14 +197,19 @@ namespace Ike
 		{
 			Log(log,Enums.LogType.Critical);
 		}
+		/// <inheritdoc cref="Critical"/>
+		public static void OutCritical(this string log)
+		{
+			Critical(log);
+		}
 
 		/// <summary>
 		/// 将<see cref="DataTable"/>数据输出到控制台
 		/// </summary>
 		/// <param name="dataTable">表</param>
-		public static void WriteDataTable(DataTable dataTable)
+		public static void ShowDataTable(DataTable dataTable)
 		{
-			WriteDataTable(dataTable, TableBorder.Ascii);
+			ShowDataTable(dataTable, TableBorder.Ascii);
 		}
 
 		/// <summary>
@@ -178,7 +217,7 @@ namespace Ike
 		/// </summary>
 		/// <param name="dataTable">表</param>
 		/// <param name="border">边框样式</param>
-		public static void WriteDataTable(DataTable dataTable, TableBorder border)
+		public static void ShowDataTable(DataTable dataTable, TableBorder border)
 		{
 			var table = new Table();
 			table.Border(border);
@@ -216,6 +255,43 @@ namespace Ike
 				image.MaxWidth(maxWidth);
 			}
 			AnsiConsole.Write(image);
+		}
+
+		/// <summary>
+		/// 显示数组数据到控制台
+		/// </summary>
+		/// <typeparam name="T">集合数据</typeparam>
+		/// <param name="array">数据</param>
+		/// <param name="isShowIndex">是否显示数据索引</param>
+		/// <param name="name">列名称</param>
+		public static void ShowArray<T>(IEnumerable<T> array,bool isShowIndex = false,string name = "Name")
+		{
+			var table = new Table();
+			table.Border(TableBorder.Ascii);
+			if (isShowIndex)
+			{
+				table.AddColumn("Index");
+			}
+			table.AddColumn(name);
+			int index = 0;
+			foreach (var row in array)
+			{
+				string? value = row?.ToString();
+				if (value == null)
+				{ 
+				    value = "NULL";
+				}
+				if (isShowIndex)
+				{
+					table.AddRow(new string[] { index.ToString(), value });
+				}
+				else
+				{
+					table.AddRow(value);
+				}
+				index++;
+			}
+			AnsiConsole.Write(table);
 		}
 
 	}

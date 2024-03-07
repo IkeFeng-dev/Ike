@@ -1,4 +1,6 @@
-﻿namespace Ike
+﻿using System.Net.NetworkInformation;
+
+namespace Ike
 {
 	/// <summary>
 	/// 获取信息类
@@ -22,6 +24,44 @@
 			return path;
 		}
 
+		/// <summary>
+		/// 获取网卡接口名称
+		/// </summary>
+		/// <returns></returns>
+		public static List<string> GetNetworkInterfaceInstanceNames()
+		{
+			List<string> instanceNames = new List<string>();
+			NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+			foreach (NetworkInterface networkInterface in interfaces)
+			{
+				instanceNames.Add(networkInterface.Name);
+			}
+			return instanceNames;
+		}
+
+		/// <summary>
+		/// 获取网卡接口描述
+		/// </summary>
+		/// <returns></returns>
+		public static List<string> GetNetworkInterfaceInstanceDescription()
+		{
+			List<string> instanceNames = new List<string>();
+			NetworkInterface[] interfaces = NetworkInterface.GetAllNetworkInterfaces();
+			foreach (NetworkInterface networkInterface in interfaces)
+			{
+				instanceNames.Add(networkInterface.Description);
+			}
+			return instanceNames;
+		}
+
+		/// <summary>
+		/// 获取本地计算机网络接口对象
+		/// </summary>
+		/// <returns>包含所有本地网络接口对象,如果没有则为空数组对象</returns>
+		public static NetworkInterface[] GetAllNetworkInterfaces()
+		{
+			return NetworkInterface.GetAllNetworkInterfaces();
+		}
 
 	}
 }
